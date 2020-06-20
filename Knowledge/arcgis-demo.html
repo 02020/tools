@@ -1,0 +1,452 @@
+<!-- @format -->
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
+    <title>Sketch update validation - 4.10</title>
+
+    <link rel="stylesheet" href="https://js.arcgis.com/4.11/esri/css/main.css" />
+    <script src="https://js.arcgis.com/4.11/"></script>
+    <style>
+      html,
+      body,
+      #viewDiv {
+        padding: 0;
+        margin: 0;
+        height: 100%;
+        width: 100%;
+        font-family: verdana;
+      }
+      ul {
+        list-style: none;
+      }
+
+      .btn-box {
+        position: absolute;
+        left: 50px;
+        top: 100px;
+      }
+
+      .btn-box ul {
+        display: flex;
+        justify-content: space-around;
+        flex-direction: column;
+      }
+
+      .btn {
+        width: 120px;
+        height: 30px;
+        line-height: 30px;
+        color: white;
+        background: #09f;
+        font-size: 14px;
+        text-align: center;
+        cursor: pointer;
+        box-shadow: 0 0 2px gray;
+      }
+    </style>
+
+    <script>
+      require([
+        'esri/Graphic',
+        'esri/Map',
+        'esri/views/MapView',
+        'esri/views/SceneView',
+        'esri/views/draw/Draw',
+        'esri/layers/FeatureLayer',
+        'esri/layers/GraphicsLayer',
+        'esri/layers/TileLayer',
+        'esri/geometry/Point',
+        'esri/geometry/Polygon',
+        'esri/geometry/Polyline',
+        'esri/geometry/geometryEngine',
+        'esri/Basemap',
+        'esri/widgets/Expand',
+        'esri/geometry/SpatialReference',
+        'esri/geometry/support/webMercatorUtils',
+      ], function (
+        Graphic,
+        Map,
+        MapView,
+        SceneView,
+        Draw,
+        FeatureLayer,
+        GraphicsLayer,
+        TileLayer,
+        Point,
+        Polygon,
+        Polyline,
+        geometryEngine,
+        Basemap,
+        Expand,
+        SpatialReference,
+        webMercatorUtils
+      ) {
+        let sketchViewModel = null;
+        let draw = null;
+        // 多边形
+        const graphicsLayer = new GraphicsLayer();
+        var editLayer = new GraphicsLayer();
+        var txtLayer = new GraphicsLayer();
+
+        const map = new Map({
+          basemap: 'streets-night-vector',
+          layers: [graphicsLayer, editLayer, txtLayer],
+        });
+        map.basemap.baseLayers.spatialReference = new SpatialReference({
+          wkid: 102100,
+          latestWkid: 3857,
+        });
+
+        const view = new SceneView({
+          container: 'viewDiv',
+          map: map,
+          center: [113.05, 23.23],
+          zoom: 16,
+        });
+        draw = new Draw({
+          view: view,
+        });
+        view.when(function () {
+          var initLonLats = [];
+          var stDragGeo = null;
+          var dragFlag = false;
+          var dragGraphic = null;
+          var drawGraphic = null;
+          view.on('drag', function (event) {
+            //拖曳中
+            if (event.action == 'update' && dragFlag) {
+              event.stopPropagation();
+              var geometry = view.toMap({
+                x: event.x,
+                y: event.y,
+              });
+              var offsetX = geometry.x - stDragGeo.x;
+              var offsetY = geometry.y - stDragGeo.y;
+              if (dragGraphic && dragGraphic.attributes) {
+                dragGraphic.geometry = geometry;
+                var gpIndex = dragGraphic.attributes.index;
+                var newVerties = [geometry.x, geometry.y];
+                var clone_drawGp = drawGraphic.geometry.clone();
+                if (drawGraphic.geometry.type == 'polyline') {
+                  clone_drawGp.paths[0][gpIndex] = newVerties;
+                } else if (drawGraphic.geometry.type == 'polygon') {
+                  clone_drawGp.rings[0][gpIndex] = newVerties;
+                }
+                drawGraphic.geometry = clone_drawGp;
+                if (drawGraphic.geometry.type == 'polyline') {
+                  calLength(drawGraphic.geometry.paths, view);
+                } else if (drawGraphic.geometry.type == 'polygon') {
+                  calArea(drawGraphic.geometry, view);
+                }
+              }
+            }
+            //拖曳结束
+            if (event.action == 'end') {
+              dragFlag = false;
+            }
+
+            //开始拖
+            if (event.action == 'start') {
+              view.hitTest(event).then(function (response) {
+                if (
+                  response.results.length > 0 &&
+                  response.results[0].graphic &&
+                  response.results[0].graphic.attributes.index >= 0
+                ) {
+                  event.stopPropagation();
+                  dragFlag = true;
+                  stDragGeo = view.toMap({
+                    x: event.x,
+                    y: event.y,
+                  });
+                  dragGraphic = response.results[0].graphic;
+                  drawGraphic = findGraphicById('draw');
+                  initLonLats = drawGraphic.geometry.rings[0];
+                }
+              });
+            }
+          });
+
+          view.on('pointer-move', function (event) {
+            //移动事件
+            view.hitTest(event).then(function (response) {
+              if (
+                response.results.length > 0 &&
+                response.results[0].graphic &&
+                response.results[0].graphic.attributes.index >= 0
+              ) {
+                document.getElementById('viewDiv').style.cursor = 'move';
+              } else {
+                document.getElementById('viewDiv').style.cursor = 'default';
+              }
+            });
+          }); //移动事件结束
+        });
+
+        //添加可编辑点
+        function addEditPt(layer, addVerties, index) {
+          var editaddpt = {
+            type: 'point',
+            x: addVerties[0],
+            y: addVerties[1],
+            spatialReference: view.spatialReference,
+          };
+          var addPtSym = {
+            type: 'simple-marker',
+            color: 'orange',
+            style: 'circle',
+          };
+          var editAddGp = new Graphic({
+            attributes: {
+              index: index,
+            },
+            geometry: editaddpt,
+            symbol: addPtSym,
+          });
+          layer.add(editAddGp);
+          return editAddGp;
+        }
+        var editGps = [];
+        document.getElementById('sketch_polyline_btn').addEventListener('click', function () {
+          graphicsLayer.removeAll();
+          txtLayer.removeAll();
+          editLayer.removeAll();
+          var action = draw.create('polyline', {
+            mode: 'click',
+          });
+          // 获取焦点
+          view.focus();
+
+          // 顶点添加事件
+          action.on('vertex-add', createPolyline);
+
+          //顶点移除事件
+          action.on('vertex-remove', createPolyline);
+
+          // 鼠标移动事件
+          action.on('cursor-update', createPolyline);
+
+          // 绘制完成事件
+          action.on('draw-complete', createPolyline);
+        });
+
+        /********************多边形***********************/
+        document.getElementById('sketch_polygon_btn').addEventListener('click', function (e) {
+          e.stopPropagation();
+          var editGps = [];
+          graphicsLayer.removeAll();
+          txtLayer.removeAll();
+          editLayer.removeAll();
+
+          var action = draw.create('polygon', {
+            mode: 'click',
+          });
+          // 获取焦点
+          view.focus();
+
+          // 顶点添加事件
+          action.on('vertex-add', createPolygon);
+
+          //顶点移除事件
+          action.on('vertex-remove', createPolygon);
+
+          // 鼠标移动事件
+          action.on('cursor-update', createPolygon);
+
+          // 绘制完成事件
+          action.on('draw-complete', createPolygon);
+        });
+
+        //根据点坐标生成新的线
+        function createPolygon(event) {
+          console.log(event);
+          //获取所有顶点
+          var vertices = event.vertices;
+          //清除之前绘制
+          graphicsLayer.removeAll();
+          //开始绘制时只有一个点，鼠标移动的时候。
+          if (vertices.length == 1) {
+            addEditPt(graphicsLayer, event.vertices[0], 0);
+          }
+          if (vertices.length == 2) {
+            var polyline = new Polyline({
+              paths: vertices,
+              spatialReference: view.spatialReference,
+            });
+            var polylineGp = new Graphic({
+              geometry: polyline,
+              symbol: {
+                type: 'simple-line', // autocasts as new SimpleFillSymbol
+                color: '#ff5502',
+                width: 2,
+                cap: 'round',
+                join: 'round',
+              },
+            });
+            graphicsLayer.add(polylineGp);
+          }
+          if (vertices.length > 2) {
+            var polygon = new Polygon({
+              hasZ: false,
+              hasM: false,
+              rings: [vertices],
+              spatialReference: view.spatialReference,
+            });
+            console.log(polygon);
+            // 生成绘制的图形
+            var graphic = new Graphic({
+              geometry: polygon,
+              symbol: {
+                type: 'simple-fill', // autocasts as new SimpleFillSymbol()
+                color: [255, 85, 2, 0.5],
+                style: 'solid',
+                outline: {
+                  // autocasts as new SimpleLineSymbol()
+                  color: 'orange',
+                  width: 2,
+                },
+              },
+            });
+            // 将绘制的图形添加到view
+            graphicsLayer.add(graphic);
+
+            calArea(polygon, view);
+          }
+
+          //每次单击添加顶点时添加一个可移动的编辑节点
+          if (event.type == 'vertex-add') {
+            var addGp = addEditPt(editLayer, vertices[event.vertexIndex], event.vertexIndex);
+            editGps.push(addGp);
+            console.log(editGps);
+          }
+          if (event.type == 'cursor-update') {
+          }
+          if (event.type == 'draw-complete') {
+            graphic.attributes = {
+              drawId: 'draw',
+            };
+          }
+        }
+
+        function createPolyline(event) {
+          console.log(event);
+          var graphic = null;
+          var vertices = event.vertices;
+          graphicsLayer.removeAll();
+          //开始绘制时只有一个点，鼠标移动的时候。
+          if (vertices.length == 1) {
+            addEditPt(graphicsLayer, event.vertices[0], 0);
+          }
+          //大于两个点，显示线
+          if (vertices.length >= 2) {
+            //线
+            var line = new Polyline({
+              paths: vertices,
+              spatialReference: view.spatialReference,
+            });
+            // 生成绘制的图形
+            graphic = new Graphic({
+              geometry: line,
+              symbol: {
+                type: 'simple-line', // autocasts as new SimpleFillSymbol
+                color: '#ff5502',
+                width: 2,
+                cap: 'round',
+                join: 'round',
+              },
+            });
+            graphicsLayer.add(graphic);
+            calLength(line.paths, view);
+          }
+          //每次单击添加顶点时添加一个可移动的编辑节点
+          if (event.type == 'vertex-add') {
+            var addGp = addEditPt(editLayer, vertices[event.vertexIndex], event.vertexIndex);
+            editGps.push(addGp);
+            console.log(editGps);
+          }
+          if (event.type == 'cursor-update') {
+          }
+          if (event.type == 'draw-complete') {
+            graphic.attributes = {
+              drawId: 'draw',
+            };
+            console.log(graphic);
+          }
+        }
+
+        function findGraphicById(id) {
+          var res = null;
+          for (var i = 0; i < graphicsLayer.graphics.items.length; i++) {
+            if (id == graphicsLayer.graphics.items[i].attributes.drawId) {
+              res = graphicsLayer.graphics.items[i];
+            }
+          }
+          return res;
+        }
+
+        function calLength(verties, view) {
+          var polyline = new Polyline({
+            paths: verties,
+            spatialReference: view.spatialReference,
+          });
+          if (view.spatialReference.isWebMercator) {
+            polyline = webMercatorUtils.webMercatorToGeographic(polyline);
+          }
+          var length = geometryEngine.geodesicLength(polyline, 'meters');
+          var content = '距离:' + length + '米';
+          var txtPt = new Point({
+            x: verties[0][0][0],
+            y: verties[0][0][1],
+            spatialReference: view.spatialReference,
+          });
+          createTextGraphic(content, txtPt);
+        }
+
+        function calArea(geom, view) {
+          if (view.spatialReference.isWebMercator) {
+            geom = webMercatorUtils.webMercatorToGeographic(geom);
+          }
+          var area = geometryEngine.geodesicArea(geom, 'square-kilometers');
+          if (area < 0) {
+            // simplify the polygon if needed and calculate the area again
+            var simplifiedPolygon = geometryEngine.simplify(geom);
+            if (simplifiedPolygon) {
+              area = geometryEngine.geodesicArea(simplifiedPolygon, 'square-meters');
+            }
+          }
+          var content = '面积:' + area.toFixed(4) + '平方千米';
+          createTextGraphic(content, geom.centroid);
+        }
+
+        function createTextGraphic(content, point) {
+          txtLayer.removeAll();
+          var txtSym = {
+            type: 'text',
+            text: content,
+            color: [255, 0, 0],
+            font: {
+              size: 16,
+            },
+          };
+          var txtGp = new Graphic({
+            geometry: point,
+            symbol: txtSym,
+          });
+          txtLayer.add(txtGp);
+        }
+      });
+    </script>
+  </head>
+
+  <body>
+    <div id="viewDiv"></div>
+    <div class="btn-box">
+      <ul>
+        <li class="btn" id="sketch_polyline_btn">绘制线</li>
+        <li class="btn" id="sketch_polygon_btn">绘制多边形</li>
+      </ul>
+    </div>
+  </body>
+</html>
