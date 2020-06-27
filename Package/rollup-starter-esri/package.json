@@ -1,0 +1,45 @@
+{
+  "name": "rollup-starter",
+  "version": "1.0.0",
+  "description": "rollup starter kit",
+  "main": "index.html",
+  "scripts": {
+    "build": "npm run clean && npm run rollup  ",
+    "clean": "rm -rf dist",
+    "browser-sync": "browser-sync start --config bs-config.js",
+    "rollup": "rollup -c rollup.config.js",
+    "rollup-watch": "npm run rollup -- --watch",
+    "start": "npm run rollup  && concurrently \"npm run browser-sync\" \"npm run rollup-watch\"",
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/beginor/rollup-starter.git"
+  },
+  "keywords": [
+    "rollup",
+    "starter"
+  ],
+  "author": "beginor <beginor@qq.com>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/beginor/rollup-starter/issues"
+  },
+  "homepage": "https://github.com/beginor/rollup-starter#readme",
+  "dependencies": {
+    "esri-loader": "^2.14.0",
+    "esri-service": "^2.6.0"
+  },
+  "devDependencies": {
+    "@types/arcgis-js-api": "^4.15.0",
+    "concurrently": "^5.2.0",
+    "rollup": "^1.32.1",
+    "rollup-plugin-alias": "^2.2.0",
+    "rollup-plugin-commonjs": "^10.1.0",
+    "rollup-plugin-css-only": "^2.1.0",
+    "rollup-plugin-node-resolve": "^5.2.0",
+    "rollup-plugin-terser": "^5.3.0",
+    "rollup-plugin-typescript2": "^0.26.0",
+    "typescript": "^3.9.5"
+  }
+}
