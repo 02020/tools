@@ -7,9 +7,7 @@
       <code>components/HelloWorld.vue</code>
       to test hot module replacement.</p>
     <!-- <Scrollbar :noresize=false
-               warp-style="max-height:200px"> -->
-    <div v-for="item in 10"
-         :key="item">{{item}}</div>
+               warp-style="max-height:200px"> --> 
 
     <!-- </Scrollbar> -->
   </div>
@@ -25,19 +23,7 @@ export default {
   },
   props: {
     msg: String
-  },
-  render () {
-    const bar = {
-      key: 1,
-
-    }
-    return h('div', {
-      class: ['el-scrollbar__bar', 'is-' + bar.key]
-
-    }, 'ddddddd')
-  },
-
-
+  }, 
   data () {
     return {
       count: 0
@@ -49,7 +35,7 @@ export default {
     },
     handle () {
 
-
+console.log("window",window)
     }
   }
 }

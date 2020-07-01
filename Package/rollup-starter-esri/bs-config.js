@@ -12,3 +12,7 @@ module.exports = {
     open: false,
     cors: false
 };
+
+
+
+// \"npm run browser-sync\"

@@ -1,6 +1,6 @@
 {
   "name": "vite-app",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
@@ -8,13 +8,10 @@
     "styleguide": "vue-styleguidist server"
   },
   "dependencies": {
-    "docdash": "^1.2.0",
-    "resize-observer-polyfill": "^1.5.1",
-    "typedoc-plugin-external-module-name": "^4.0.3",
-    "vue": "^3.0.0-beta.14"
+    "vue": "^3.0.0-beta.15"
   },
   "devDependencies": {
-    "vite": "^0.20.0",
-    "@vue/compiler-sfc": "^3.0.0-beta.14"
+    "vite": "^1.0.0-beta.3",
+    "@vue/compiler-sfc": "^3.0.0-beta.15"
   }
 }
