@@ -1,11 +1,19 @@
 [
     {
-        "type": "Directory",
-        "name": "d:\\Fr\\__\\vite-app\\Package\\rollup-starter-esri\\src",
+        "type": "Group",
+        "name": "formily",
         "parent_id": null,
-        "fsPath": "d:\\Fr\\__\\vite-app\\Package\\rollup-starter-esri\\src",
         "workspaceRoot": null,
         "workspacePath": null,
-        "id": "yWsVNxd3aSEO4gAf"
+        "id": "PfYne1sEI6m2Abyq"
+    },
+    {
+        "type": "Directory",
+        "name": "d:\\Fr\\__\\vite-app\\Package\\formily\\packages\\core\\src",
+        "parent_id": "PfYne1sEI6m2Abyq",
+        "fsPath": "d:\\Fr\\__\\vite-app\\Package\\formily\\packages\\core\\src",
+        "workspaceRoot": null,
+        "workspacePath": null,
+        "id": "6siuGaWF3JdmXLzl"
     }
 ]

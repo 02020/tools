@@ -1,15 +1,13 @@
 
 import Vue from 'vue'
-import store from '@/store'
-import {
-  router
-} from '@/router/index'
+// import store from '@/store'
+
 
 const Modal = (options, cb) => {
   return {
     name: 'x-modal',
-    store,
-    router,  // 路由注入
+    // store,
+
     data () {
       return {
         value: true, // value控制显示隐藏model使用的值

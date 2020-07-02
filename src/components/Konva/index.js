@@ -1,9 +1,9 @@
 /** @format */
 
 // 权属表更图表组件
-import Konva from 'konva'
+// import Konva from 'konva'
 import Qstruct from '../../utils/qstruct'
-
+const Konva ={}
 import {
   titleEntity,
   textEntity,
@@ -178,10 +178,10 @@ function getArrowPositionY(items) {
         })
       })
 
-      hs.forEach(h => {
+      hs.forEach(x => {
         const startX =
           arrow.startX +
-          h.col * (defaultValue.container.margin + defaultValue.container.width)
+          x.col * (defaultValue.container.margin + defaultValue.container.width)
         const _h = hs.find(x => x.col === h.col + 1)
         _h && defaultValueial.push([startX, h.y, startX + arrow.length, _h.y])
       })

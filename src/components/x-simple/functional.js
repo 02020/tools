@@ -1,4 +1,4 @@
-import { getRequest } from '@/libs/axios'
+
 // 函数式组件
 // 没有this 不能使用this.$emit('click',arg)
 // 通过属性来传递方法

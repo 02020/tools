@@ -50,7 +50,7 @@
 <script>
 //获取生成器
 import { funButtons } from "./functional";
-import { executeHandle, firstUpper } from '@/utils/handle'
+// import { executeHandle, firstUpper } from '@/utils/handle'
 import { renderColumns } from '../application/ThePage/mixins/render'
 export default {
   title: "xTable",

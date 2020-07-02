@@ -1,5 +1,5 @@
-import { isBoolean, isString, isObject, isFunction } from '@/utils/is'
-import { formatDate } from '@/utils/format'
+// import { isBoolean, isString, isObject, isFunction } from '@/utils/is'
+// import { formatDate } from '@/utils/format'
 // 表格操作按钮
 export const renderActions = (vm, h, params, key, list) => {
   // list: label,action,type

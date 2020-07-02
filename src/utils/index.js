@@ -1,6 +1,8 @@
 import { formCreateOption } from './form'
 import util from './util'
-import store from "@/store"
+// import store from "@/store"
+const store = {}
+
 import is from "./is"
 export { getListeners } from './handle'
 

@@ -1,0 +1,9 @@
+{
+  "extends": "@snowpack/app-scripts-vue",
+  "plugins": [
+    "@snowpack/plugin-babel"
+  ],
+  "scripts": {
+    "build:js,jsx,ts,tsx": "@snowpack/plugin-babel"
+  }
+}
