@@ -30,6 +30,17 @@ export default {
         commonjs({
             include: [],
         }),
+
         production && terser.terser({}),
     ],
 };
+
+/*
+import replace from 'rollup-plugin-replace'
+
+replace({
+    'process.env.NODE_ENV': JSON.stringify('development'),
+    'process.env.VUE_ENV': JSON.stringify('browser')
+  }),
+
+  */
