@@ -16,7 +16,7 @@
     "@babel/plugin-transform-react-jsx": "^7.3.0",
     "@babel/preset-react": "^7.0.0",
     "parcel-bundler": "^1.12.3",
-    "react": "^0.0.0-experimental-8b155d261",
+    "react": "^0.14.0",
     "react-dom": "^0.0.0-experimental-8b155d261"
   },
   "dependencies": {
