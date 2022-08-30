@@ -27,7 +27,7 @@
     "@snowpack/app-scripts-vue": "^1.1.4",
     "@snowpack/plugin-babel": "^1.4.0",
     "@babel/preset-env": "^7.10.4",
-    "vite": "^1.0.0-beta.3",
+    "vite": "^2.9.13",
     "@vue/compiler-sfc": "^3.0.0-beta.15"
   }
 }
